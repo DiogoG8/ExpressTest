@@ -56,7 +56,26 @@ const getUsersById = (req, res) => {
     });
 };
 
+const postUser = (req, res) => {
+  const { id, firstname, lastname, email, language } = req.body;
+
+  database
+    .query(
+      "INSERT INTO users(id, firstname, lastname, email, language) VALUES (?, ?, ?, ?, ?)",
+      [id, firstname, lastname, email, language]
+    )
+    .then(([result]) => {
+      res.location(`/api/users/${result.insertId}`).sendStatus(201);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error saving the movie");
+    });
+};
+
+
 module.exports = {
   getUsers,
   getUsersById,
+  postUser,
 };
