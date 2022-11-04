@@ -1,30 +1,5 @@
 const database = require("./database");
-const users = [
-  {
-    id: 1,
-    title: "Citizen Kane",
-    director: "Orson Wells",
-    year: "1941",
-    colors: false,
-    duration: 120,
-  },
-  {
-    id: 2,
-    title: "The Godfather",
-    director: "Francis Ford Coppola",
-    year: "1972",
-    colors: true,
-    duration: 180,
-  },
-  {
-    id: 3,
-    title: "Pulp Fiction",
-    director: "Quentin Tarantino",
-    year: "1994",
-    color: true,
-    duration: 180,
-  },
-];
+
 
 const getUsers = (req, res) => {
   database
@@ -69,13 +44,38 @@ const postUser = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      res.status(500).send("Error saving the movie");
+      res.status(500).send("Error saving the user");
     });
 };
+
+
+const updateUser = (req, res) => {
+  const id = parseInt(req.params.id);
+  const {firstname, lastname, email, language } = req.body;
+
+  database
+    .query(
+      "update users set firstname = ?, lastname= ?, email = ?, language = ? where id = ?",
+      [firstname, lastname, email, language, id]
+    )
+    .then(([result]) => {
+      if (result.affectedRows === 0) {
+        res.status(404).send("Not Found");
+      } else {
+        res.sendStatus(204);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error editing the user");
+    });
+};
+
 
 
 module.exports = {
   getUsers,
   getUsersById,
   postUser,
+  updateUser,
 };
