@@ -4,6 +4,9 @@ const express = require("express");
 
 const app = express();
 
+const { validateMovie } = require("./validators.js");
+const { validateUser } = require("./validators.js");
+
 app.use(express.json());
 
 const port = process.env.APP_PORT ?? 5000;
@@ -13,21 +16,26 @@ const welcome = (req, res) => {
 
 app.get("/", welcome);
 
-//const movieHandlers = require("./movieHandlers");
+const movieHandlers = require("./movieHandlers");
 const userHandlers = require("./userHandlers");
 
+
+//USERS
 app.get("/api/users/:id", userHandlers.getUsersById);
 app.get("/api/users", userHandlers.getUsers);
-app.post("/api/users", userHandlers.postUser);
-app.put("/api/users/:id", userHandlers.updateUser);
+app.post("/api/users", validateUser, userHandlers.postUser);
+app.put("/api/users/:id", validateUser, userHandlers.updateUser);
 app.delete("/api/users/:id", userHandlers.deleteUser);
 
 
-//app.post("/api/movies", movieHandlers.postMovie);
-//app.get("/api/movies", movieHandlers.getMovies);
-//app.get("/api/movies/:id", movieHandlers.getMovieById);
-//app.put("/api/movies/:id", movieHandlers.updateMovie);
-//app.delete("/api/movies/:id", movieHandlers.deleteMovie);
+//MOVIES
+app.get("/api/movies", movieHandlers.getMovies);
+app.get("/api/movies/:id", movieHandlers.getMovieById);
+app.put("/api/movies/:id", validateMovie, movieHandlers.updateMovie);
+app.delete("/api/movies/:id", movieHandlers.deleteMovie);
+app.post("/api/movies", validateMovie, movieHandlers.postMovie);
+
+
 
 app.listen(port, (err) => {
   if (err) {
