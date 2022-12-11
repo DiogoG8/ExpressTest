@@ -25,7 +25,7 @@ const hashPassword = (req, res, next) => {
     });
 };*/
 
-/*const verifyPassword = (req, res) => {
+const verifyPassword = (req, res) => {
   argon2
     .verify(req.user.hashedPassword, req.body.password)
     .then((isVerified) => {
@@ -69,12 +69,12 @@ const verifyToken = (req, res, next) => {
     console.error(err);
     res.sendStatus(401);
   }
-};*/
+};
 
-/*module.exports = {
-  /*hashPassword,
-  /*verifyPassword,
-  verifyToken,*/
-//};
+module.exports = {
+  //hashPassword,
+  verifyPassword,
+  verifyToken,
+};
 
 
