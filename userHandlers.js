@@ -1,4 +1,5 @@
 const database = require("./database");
+const argon2 = require("argon2");
 
 
 const getUsers = (req, res) => {
@@ -58,21 +59,44 @@ const getUsersById = (req, res) => {
     });
 };
 
-const postUser = (req, res) => {
-  const { id, firstname, lastname, email, language } = req.body;
+const postUser = (req, res, next) => {
+  
+  const hashingOptions = {
+    type: argon2.argon2id,
+    memoryCost: 2 ** 16,
+    timeCost: 5,
+    parallelism: 1,
+  };
+  const { id, firstname, lastname, email, city, language, hashedPassword} = req.body;
 
-  database
+  argon2
+  .hash(req.body.password, hashingOptions)
+  .then((hashedPassword) => {
+    console.log(hashedPassword);
+
+    req.body.hashedPassword = hashedPassword;
+    delete req.body.password;
+
+
+    database
     .query(
-      "INSERT INTO users(id, firstname, lastname, email, language) VALUES (?, ?, ?, ?, ?)",
-      [id, firstname, lastname, email, language]
+      "INSERT INTO users(id, firstname, lastname, email, city, language, hashedPassword) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [id, firstname, lastname, email, city, language, hashedPassword]
     )
     .then(([result]) => {
       res.location(`/api/users/${result.insertId}`).sendStatus(201);
+      next()
     })
     .catch((err) => {
       console.error(err);
       res.status(500).send("Error saving the user");
     });
+  })
+  .catch((err) => {
+    console.error(err);
+    res.sendStatus(500);
+  });
+
 };
 
 
@@ -118,10 +142,32 @@ const deleteUser = (req, res) => {
 
 
 
+const getUserByEmailWithPasswordAndPassToNext = (req, res, next) => {
+  const { email } = req.body;
+
+  database
+    .query("select * from users where email = ?", [email])
+    .then(([users]) => {
+      if (users[0] != null) {
+        req.user = users[0];
+
+        next();
+      } else {
+        res.sendStatus(401);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error retrieving data from database");
+    });
+};
+
+
 module.exports = {
   getUsers,
   getUsersById,
   postUser,
   updateUser,
   deleteUser,
+  getUserByEmailWithPasswordAndPassToNext
 };

@@ -1,11 +1,13 @@
 require("dotenv").config();
 
+const { hashPassword, verifyPassword, verifyToken } = require("./auth");
+
 const express = require("express");
 
 const app = express();
 
 const { validateMovie } = require("./validators.js");
-const { validateUser } = require("./validators.js");
+
 
 app.use(express.json());
 
@@ -20,11 +22,22 @@ const movieHandlers = require("./movieHandlers");
 const userHandlers = require("./userHandlers");
 
 
+
+
+
+//LOGIN
+/*app.post(
+  "/api/login",
+  userHandlers.getUserByEmailWithPasswordAndPassToNext,
+  verifyPassword
+);*/
+
+
 //USERS
 app.get("/api/users/:id", userHandlers.getUsersById);
 app.get("/api/users", userHandlers.getUsers);
-app.post("/api/users", validateUser, userHandlers.postUser);
-app.put("/api/users/:id", validateUser, userHandlers.updateUser);
+app.post("/api/users", userHandlers.postUser);
+app.put("/api/users/:id", userHandlers.updateUser);
 app.delete("/api/users/:id", userHandlers.deleteUser);
 
 
@@ -33,7 +46,7 @@ app.get("/api/movies", movieHandlers.getMovies);
 app.get("/api/movies/:id", movieHandlers.getMovieById);
 app.put("/api/movies/:id", validateMovie, movieHandlers.updateMovie);
 app.delete("/api/movies/:id", movieHandlers.deleteMovie);
-app.post("/api/movies", validateMovie, movieHandlers.postMovie);
+app.post("/api/movies", movieHandlers.postMovie);
 
 
 
